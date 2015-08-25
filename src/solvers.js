@@ -71,29 +71,31 @@ window.countNQueensSolutions = function(n) {
   var queenCount = 0;
 
   var inner = function(n, board, row){
-    row = row || 0;
+    if(row === undefined) {
+      row = n - 1;
+    }
     for(var col = 0; col < n; col++){
       board.set(row, board.get(row).map(function(){return 0;}));
       board.togglePiece(row, col);
-
+      // debugger;
       if(board.hasColConflictAt(col) || 
-        board.hasAnyMajorDiagonalConflicts() || 
-        board.hasAnyMinorDiagonalConflicts()){
+        board.hasMajorDiagonalConflictAt(col, row) || 
+        board.hasMinorDiagonalConflictAt(col, row)){
         continue;
       }
 
-      if(row === n-1){
+      if(row === 0){
         if(n === _.flatten(board.rows()).reduce(function(a,b) { return a + b})){ 
           count++;
         }
         continue;
       }
 
-      if(row < n -1){
-        row++;
+      if(row > 0){
+        row--; 
         inner(n, board, row);
         board.set(row, board.get(row).map(function(){return 0}));
-        row--; 
+        row++;
       }
     }
   };

@@ -131,12 +131,15 @@
     // --------------------------------------------------------------
     //
     // test if a specific major diagonal on this board contains a conflict
-    hasMajorDiagonalConflictAt: function(index) {
+    hasMajorDiagonalConflictAt: function(column, row) {
       var rows = this.rows();
+      var n = this.attributes.n;
       var diag = [];
-      for(var i = 0; i < rows.length - index; i++) {
-        diag.push(rows[i][i + index]);
+      row = row || 0;
+      for(var i = 0; i < n - column && i < n - row; i++) {
+        diag.push(rows[i + row][i + column]);
       }
+
       return !!(diag.reduce(function(a,b) {return a + b;}) > 1);
     },
 
@@ -155,11 +158,14 @@
     // --------------------------------------------------------------
     //
     // test if a specific minor diagonal on this board contains a conflict
-    hasMinorDiagonalConflictAt: function(index) {
+    hasMinorDiagonalConflictAt: function(column, row) {
       var rows = this.rows();
+      var n = this.attributes.n;
       var diag = [];
-      for(var i = 0; i <= index; i++) {
-        diag.push(rows[i][index - i]);
+      row = row || 0;
+      
+      for(var i = 0; i < column + 1 && i < n - row; i++){
+        diag.push(rows[i + row][column - i])
       }
       return !!(diag.reduce(function(a,b) { return a + b;}) > 1);
     },
