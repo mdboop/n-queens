@@ -14,9 +14,6 @@
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 window.findNRooksSolution = function(n){
-  var solution = 1; //fixme
-  console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
-  return solution;
 };
 
 
@@ -43,7 +40,6 @@ window.countNRooksSolutions = function(n) {
         continue;
       }
       if(row < n - 1) {
-        //increasing row wierdly
         row++;
         inner(n, board, row);
         board.set(row, board.get(row).map(function(){return 0}));
@@ -58,12 +54,6 @@ window.countNRooksSolutions = function(n) {
     return count;
 
   };
-  
-  //call recursion on board
-
-  //basecase
-  //if(cant fill any row){backtrack}
-  //if(fill last row){add to solution count}
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
@@ -76,8 +66,66 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solution = undefined; //fixme
+  var count = 0;
+  var board = new Board({'n' : n});
+  var queenCount = 0;
 
-  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
-  return solutionCount;
+  var inner = function(n, board, row){
+    row = row || 0;
+    for(var col = 0; col < n; col++){
+      board.set(row, board.get(row).map(function(){return 0;}));
+      board.togglePiece(row, col);
+
+      if(board.hasColConflictAt(col) || 
+        board.hasAnyMajorDiagonalConflicts() || 
+        board.hasAnyMinorDiagonalConflicts()){
+        continue;
+      }
+
+      if(row === n-1){
+        if(n === _.flatten(board.rows()).reduce(function(a,b) { return a + b})){ 
+          count++;
+        }
+        continue;
+      }
+
+      if(row < n -1){
+        row++;
+        inner(n, board, row);
+        board.set(row, board.get(row).map(function(){return 0}));
+        row--; 
+      }
+    }
+  };
+
+ inner(n,board);
+ return count;
+
+
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
