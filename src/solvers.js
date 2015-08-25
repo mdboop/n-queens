@@ -14,6 +14,47 @@
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 window.findNRooksSolution = function(n){
+  var count = 0;
+  var board = new Board({'n': n});
+  var solution;
+
+  var inner = function(n, board, row) {
+    row = row || 0;
+    //loop over current row n times
+    for(var col = 0; col < n; col++) {
+      board.set(row, board.get(row).map(function(){return 0}));
+
+      board.togglePiece(row, col);
+      
+      if(board.hasColConflictAt(col)) {
+        continue;
+      }
+
+      if(row === n - 1) {
+        solution = new Board(board.rows());
+        count++;
+        continue;
+      }
+      if(row < n - 1) {
+        row++;
+        inner(n, board, row);
+        board.set(row, board.get(row).map(function(){return 0}));
+        row--; 
+      }
+
+      if(count >0){
+        return;
+      }
+    }
+
+    };
+
+    inner(n, board);
+    if(solution === undefined){
+     return new Board({'n': n})
+   }
+
+    return solution;
 };
 
 
@@ -57,10 +98,55 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var solution = undefined; //fixme
+  var count = 0;
+  var board = new Board({'n' : n});
+  var queenCount = 0;
+  var solution;
 
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-  return solution;
+  var inner = function(n, board, row){
+    if(row === undefined) {
+      row = n - 1;
+    }
+    for(var col = 0; col < n; col++){
+      board.set(row, board.get(row).map(function(){return 0;}));
+      board.togglePiece(row, col);
+      // debugger;
+      if(board.hasColConflictAt(col) || 
+        board.hasMajorDiagonalConflictAt(col, row) || 
+        board.hasMinorDiagonalConflictAt(col, row)){
+        continue;
+      }
+
+      if(row === 0){
+        if(n === _.flatten(board.rows()).reduce(function(a,b) { return a + b})){ 
+          count++;
+          solution = new Board(board.rows())
+          console.log(board.rows());
+        }
+        continue;
+      }
+
+      if(row > 0){
+        row--; 
+        inner(n, board, row);
+        board.set(row, board.get(row).map(function(){return 0}));
+        row++;
+      }
+
+      if(count > 0){
+        return;
+      }
+    }
+  };
+
+ inner(n,board);
+ if(solution === undefined){
+   return new Board({'n': n})
+ }
+
+ return solution;
+
+
 };
 
 
