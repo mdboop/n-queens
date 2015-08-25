@@ -22,33 +22,48 @@ window.findNRooksSolution = function(n){
 
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
-window.countNRooksSolutions = function(n, board, depth, solutionsCount) {
-  depth = depth || 0
-  board = board || new Board ({"n": n});
-  solutionsCount = solutionsCount || 0;
+window.countNRooksSolutions = function(n) {
+  var count = 0;
+  var board = new Board({'n': n});
 
-  for(var i = 0; i < n; i++) {
-    //check for row(depth) conflicts, if no conflict, toggle piece
-    if(!board.hasRowConflictAt(depth)) {
-      board.togglePiece(i, depth);
+  var inner = function(n, board, row) {
+    row = row || 0;
+    //loop over current row n times
+    for(var col = 0; col < n; col++) {
+      board.set(row, board.get(row).map(function(){return 0}));
+
+      board.togglePiece(row, col);
+      
+      if(board.hasColConflictAt(col)) {
+        continue;
+      }
+
+      if(row === n - 1) {
+        count++;
+        continue;
+      }
+      if(row < n - 1) {
+        //increasing row wierdly
+        row++;
+        inner(n, board, row);
+        board.set(row, board.get(row).map(function(){return 0}));
+        row--; 
+      }
     }
 
-    if(depth <= n){ 
-      countNRooksSolutions(n, board, depth++, solutionsCount);  
-    }
-    
-    solutionsCount++
-    
+    };
 
-    //iterate over blank boards, starting each one a new row in column 0;
-  }
+    inner(n, board);
 
-  return solutionsCount;
+    return count;
 
+  };
+  
+  //call recursion on board
 
-};
-
-
+  //basecase
+  //if(cant fill any row){backtrack}
+  //if(fill last row){add to solution count}
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
