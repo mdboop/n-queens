@@ -13,86 +13,53 @@
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
+
+window.checkPermutations = function(n, row, board, checkMethod, callback) {
+    //base case: complete board
+    if(row === n && n !== 0) {
+      return callback();
+      // return;
+    }
+    //recursive case
+    if(row < n) {
+      for(var col = 0; col < n; col++) {
+        board.togglePiece(row,col);
+        //check here
+        //use checkMethod for check
+        if(!board[checkMethod]()) {
+          // debugger;
+          var result = checkPermutations(n,row+1, board, checkMethod, callback);
+          if(result) {
+            return result;
+          }
+        }
+        board.togglePiece(row,col);   
+      }
+    }
+};
+
 window.findNRooksSolution = function(n){
   var count = 0;
   var board = new Board({'n': n});
-  var solution;
+  return checkPermutations(n,0,board,"hasAnyColConflicts", function() {
+    return new Board(board.rows());
+  });
 
-  var inner = function(n, board, row) {
-    row = row || 0;
-    //loop over current row n times
-    for(var col = 0; col < n; col++) {
-      board.set(row, board.get(row).map(function(){return 0}));
-
-      board.togglePiece(row, col);
-      
-      if(board.hasColConflictAt(col)) {
-        continue;
-      }
-
-      if(row === n - 1) {
-        solution = new Board(board.rows());
-        count++;
-        continue;
-      }
-      if(row < n - 1) {
-        row++;
-        inner(n, board, row);
-        board.set(row, board.get(row).map(function(){return 0}));
-        row--; 
-      }
-
-      if(count >0){
-        return;
-      }
-    }
-
-    };
-
-    inner(n, board);
-    if(solution === undefined){
-     return new Board({'n': n})
-   }
-
-    return solution;
 };
 
 
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
+  //create count
   var count = 0;
+  //create board
   var board = new Board({'n': n});
 
-  var inner = function(n, board, row) {
-    row = row || 0;
-    //loop over current row n times
-    for(var col = 0; col < n; col++) {
-      board.set(row, board.get(row).map(function(){return 0}));
+  checkPermutations(n, 0, board, "hasAnyColConflicts", function() { count++; });
 
-      board.togglePiece(row, col);
-      
-      if(board.hasColConflictAt(col)) {
-        continue;
-      }
-
-      if(row === n - 1) {
-        count++;
-        continue;
-      }
-      if(row < n - 1) {
-        row++;
-        inner(n, board, row);
-        board.set(row, board.get(row).map(function(){return 0}));
-        row--; 
-      }
-    }
-
-    };
-
-    inner(n, board);
-
-    return count;
+  //return count
+  return count;
 
   };
 
@@ -100,96 +67,19 @@ window.countNRooksSolutions = function(n) {
 window.findNQueensSolution = function(n) {
   var count = 0;
   var board = new Board({'n' : n});
-  var queenCount = 0;
-  var solution;
-
-  var inner = function(n, board, row){
-    if(row === undefined) {
-      row = n - 1;
-    }
-    for(var col = 0; col < n; col++){
-      board.set(row, board.get(row).map(function(){return 0;}));
-      board.togglePiece(row, col);
-      // debugger;
-      if(board.hasColConflictAt(col) || 
-        board.hasMajorDiagonalConflictAt(col, row) || 
-        board.hasMinorDiagonalConflictAt(col, row)){
-        continue;
-      }
-
-      if(row === 0){
-        if(n === _.flatten(board.rows()).reduce(function(a,b) { return a + b})){ 
-          count++;
-          solution = new Board(board.rows())
-          console.log(board.rows());
-        }
-        continue;
-      }
-
-      if(row > 0){
-        row--; 
-        inner(n, board, row);
-        board.set(row, board.get(row).map(function(){return 0}));
-        row++;
-      }
-
-      if(count > 0){
-        return;
-      }
-    }
-  };
-
- inner(n,board);
- if(solution === undefined){
-   return new Board({'n': n})
- }
-
- return solution;
-
-
+  return checkPermutations(n, 0, board, "hasAnyQueensConflicts", function() { 
+    return new Board(board.rows());
+  }) || new Board({'n':n});
 };
 
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
+
   var count = 0;
   var board = new Board({'n' : n});
-  var queenCount = 0;
-
-  var inner = function(n, board, row){
-    if(row === undefined) {
-      row = n - 1;
-    }
-    for(var col = 0; col < n; col++){
-      board.set(row, board.get(row).map(function(){return 0;}));
-      board.togglePiece(row, col);
-      // debugger;
-      if(board.hasColConflictAt(col) || 
-        board.hasMajorDiagonalConflictAt(col, row) || 
-        board.hasMinorDiagonalConflictAt(col, row)){
-        continue;
-      }
-
-      if(row === 0){
-        if(n === _.flatten(board.rows()).reduce(function(a,b) { return a + b})){ 
-          count++;
-        }
-        continue;
-      }
-
-      if(row > 0){
-        row--; 
-        inner(n, board, row);
-        board.set(row, board.get(row).map(function(){return 0}));
-        row++;
-      }
-    }
-  };
-
- inner(n,board);
- return count;
-
-
+  checkPermutations(n, 0, board, "hasAnyQueensConflicts", function() { count++; });
+  return count;
 };
 
 

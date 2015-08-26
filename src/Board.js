@@ -10,7 +10,7 @@
       if (_.isUndefined(params) || _.isNull(params)) {
         console.log('Good guess! But to use the Board() constructor, you must pass it an argument in one of the following formats:');
         console.log('\t1. An object. To create an empty board of size n:\n\t\t{n: %c<num>%c} - Where %c<num> %cis the dimension of the (empty) board you wish to instantiate\n\t\t%cEXAMPLE: var board = new Board({n:5})', 'color: blue;', 'color: black;','color: blue;', 'color: black;', 'color: grey;');
-        console.log('\t2. An array of arrays (a matrix). To create a populated board of size n:\n\t\t[ [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...] ] - Where each %c<val>%c is whatever value you want at that location on the board\n\t\t%cEXAMPLE: var board = new Board([[1,0,0],[0,1,0],[0,0,1]])', 'color: blue;', 'color: black;','color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
+        console.log('\t2. An array of arrays (a matrix). To create a populated board of size n:\n\t\t[ [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...] ] - Where each %c<val>%c is whatever value you want at that location on the board\n\t\t%cEXAMPLE: var board = new Board([[1,0,0],[0,1,0],[0,0,1]])', 'color:  blue;', 'color: black;','color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
       } else if (params.hasOwnProperty('n')) {
         this.set(makeEmptyMatrix(this.get('n')));
       } else {
@@ -22,19 +22,6 @@
       return _(_.range(this.get('n'))).map(function(rowIndex) {
         return this.get(rowIndex);
       }, this);
-    },
-
-    columns: function() {
-      var rows = this.rows();
-      var columns = [];
-      for(var i = 0; i < rows.length; i++){
-        var thisColumn = [];
-        for(var j = 0; j < rows.length; j++) {
-          thisColumn.push(rows[j][i]);
-        }
-        columns.push(thisColumn);
-      }
-      return columns;
     },
 
     togglePiece: function(rowIndex, colIndex) {
@@ -56,7 +43,6 @@
 
     hasAnyQueenConflictsOn: function(rowIndex, colIndex) {
       return (
-        this.hasRowConflictAt(rowIndex) ||
         this.hasColConflictAt(colIndex) ||
         this.hasMajorDiagonalConflictAt(this._getFirstRowColumnIndexForMajorDiagonalOn(rowIndex, colIndex)) ||
         this.hasMinorDiagonalConflictAt(this._getFirstRowColumnIndexForMinorDiagonalOn(rowIndex, colIndex))
@@ -92,17 +78,22 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
-      var rows = this.rows();
-      return !!(rows[rowIndex].reduce(function(a,b) {return a + b;}) > 1);
+      var row = this.get(rowIndex);
+      var count = 0;
+      for(var i = 0; i < this.attributes.n; i++) {
+        count += row[i];
+      }
+      return count > 1;
     },
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      var rows = this.rows();
-      var boundCheck = this.hasRowConflictAt.bind(this);
-      return _.some(rows,function (row,i){
-        return boundCheck(i);
-      });
+      for(var i = 0; i < this.attributes.n; i++) {
+        if(this.hasRowConflictAt(i)) {
+          return true;
+        };
+      }
+      return false;
     },
 
 
@@ -112,17 +103,22 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      var columns = this.columns();
-      return !!(columns[colIndex].reduce(function(a,b) {return a + b;}) > 1);
+      var rows = this.rows();
+      var count = 0;
+      for(var i = 0; i < this.attributes.n; i++) {
+        count += rows[i][colIndex];
+      }
+      return count > 1;
     },
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      var columns = this.columns();
-      var boundCheck = this.hasColConflictAt.bind(this);
-      return _.some(columns, function (col, i){
-        return boundCheck(i);
-      });
+      for(var i = 0; i < this.attributes.n; i++) {
+        if(this.hasColConflictAt(i)) {
+          return true;
+        }
+      }
+      return false;
     },
 
 
@@ -131,25 +127,27 @@
     // --------------------------------------------------------------
     //
     // test if a specific major diagonal on this board contains a conflict
-    hasMajorDiagonalConflictAt: function(column, row) {
+    hasMajorDiagonalConflictAt: function(colIndex) {
       var rows = this.rows();
-      var n = this.attributes.n;
-      var diag = [];
-      row = row || 0;
-      for(var i = 0; i < n - column && i < n - row; i++) {
-        diag.push(rows[i + row][i + column]);
+      var count = 0;
+      for(var r = 0; r < this.attributes.n - 1; r++) {
+        for(var i = 0; i < this.attributes.n - colIndex - r; i++) {
+          count += rows[i + r][i + colIndex];
+        }
+        if(count > 1){return true}
+        count = 0;
       }
-
-      return !!(diag.reduce(function(a,b) {return a + b;}) > 1);
+      return false;
     },
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      var diags = this.rows();
-      var boundCheck = this.hasMajorDiagonalConflictAt.bind(this);
-      return _.some(diags, function(diag, i) {
-        return boundCheck(i);
-      });
+      for(var i = 0; i < this.attributes.n; i++) {
+        if(this.hasMajorDiagonalConflictAt(i)) {
+          return true;
+        }
+      }
+      return false;
     },
 
 
@@ -158,25 +156,29 @@
     // --------------------------------------------------------------
     //
     // test if a specific minor diagonal on this board contains a conflict
-    hasMinorDiagonalConflictAt: function(column, row) {
+    hasMinorDiagonalConflictAt: function(colIndex) {
       var rows = this.rows();
-      var n = this.attributes.n;
-      var diag = [];
-      row = row || 0;
-      
-      for(var i = 0; i < column + 1 && i < n - row; i++){
-        diag.push(rows[i + row][column - i])
+      var count = 0;
+      for(var r = 0; r < this.attributes.n - 1; r++){
+        for(var i = 0; i <= colIndex - r; i++) {
+          count += rows[i + r][colIndex - i];
+        }
+        if(count > 1){
+          return true;
+        }
+        count = 0;
       }
-      return !!(diag.reduce(function(a,b) { return a + b;}) > 1);
+      return false;;
     },
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      var diags = this.rows();
-      var boundCheck = this.hasMinorDiagonalConflictAt.bind(this);
-      return _.some(diags, function(diag, i) {
-        return boundCheck(i);
-      });
+      for(var i = 0; i < this.attributes.n; i++) {
+        if(this.hasMinorDiagonalConflictAt(i)) {
+          return true;
+        }
+      }
+      return false;
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
