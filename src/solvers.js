@@ -38,10 +38,33 @@ window.checkPermutations = function(n, row, board, checkMethod, callback) {
     }
 };
 
+window.findRooks = function(n, row, board, callback) {
+    //base case: complete board
+    if(row === n && n !== 0) {
+      return callback();
+      // return;
+    }
+    //recursive case
+    if(row < n) {
+      for(var col = 0; col < n; col++) {
+        board.togglePiece(row,col);
+        //check here
+        //use checkMethod for check
+        if(!board.hasColConflictAt(col)) {
+          var result = findRooks(n,row+1, board, callback);
+          if(result) {
+            return result;
+          }
+        }
+        board.togglePiece(row,col);   
+      }
+    }
+};
+
 window.findNRooksSolution = function(n){
   var count = 0;
   var board = new Board({'n': n});
-  return checkPermutations(n,0,board,"hasAnyColConflicts", function() {
+  return findRooks(n,0,board, function() {
     return new Board(board.rows());
   });
 
@@ -56,7 +79,7 @@ window.countNRooksSolutions = function(n) {
   //create board
   var board = new Board({'n': n});
 
-  checkPermutations(n, 0, board, "hasAnyColConflicts", function() { count++; });
+  findRooks(n, 0, board, function() { count++; });
 
   //return count
   return count;
