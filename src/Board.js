@@ -141,6 +141,16 @@
       return false;
     },
 
+    speedyMajorDiagonalAt: function(r, colIndex) {
+      var rows = this.rows();
+      var count = 0;
+        for(var i = 0; i < this.attributes.n - colIndex && i < this.attributes.n - r; i++) {
+          count += rows[i + r][i + colIndex];
+        }
+        return count > 1;
+    },
+
+
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
       for(var i = 0; i < this.attributes.n; i++) {
@@ -170,6 +180,15 @@
         count = 0;
       }
       return false;;
+    },
+
+    speedyMinorDiagonalAt: function(r, colIndex) {
+      var rows = this.rows();
+      var count = 0;
+        for(var i = 0; i <= colIndex && i < this.attributes.n - r; i++) {
+          count += rows[i + r][colIndex - i];
+        }
+        return count > 1;
     },
 
     // test if any minor diagonals on this board contain conflicts

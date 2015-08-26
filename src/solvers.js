@@ -74,7 +74,7 @@ window.findQueens = function(n, row, board, callback) {
         board.togglePiece(row,col);
         //check here
         //used for check
-        if(!board.hasMajorDiagonalConflictAt(col) && !board.hasMinorDiagonalConflictAt(col) && !board.hasColConflictAt(col)) {
+        if(!board.speedyMajorDiagonalAt(row, col) && !board.speedyMinorDiagonalAt(row,col) && !board.hasColConflictAt(col)) {
           // debugger;
           var result = findQueens(n,row - 1, board, callback);
           if(result) {
