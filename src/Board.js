@@ -132,7 +132,7 @@
       var rows = this.rows();
       var count = 0;
       for(var r = 0; r < this.attributes.n - 1; r++) {
-        for(var i = 0; i < this.attributes.n - colIndex - r; i++) {
+        for(var i = 0; i < this.attributes.n - colIndex && i < this.attributes.n - r; i++) {
           count += rows[i + r][i + colIndex];
         }
         if(count > 1){return true}
@@ -161,7 +161,7 @@
       var rows = this.rows();
       var count = 0;
       for(var r = 0; r < this.attributes.n - 1; r++){
-        for(var i = 0; i <= colIndex - r; i++) {
+        for(var i = 0; i <= colIndex && i < this.attributes.n - r; i++) {
           count += rows[i + r][colIndex - i];
         }
         if(count > 1){
