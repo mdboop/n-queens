@@ -13,31 +13,6 @@
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
-
-window.checkPermutations = function(n, row, board, checkMethod, callback) {
-    //base case: complete board
-    if(row === n && n !== 0) {
-      return callback();
-      // return;
-    }
-    //recursive case
-    if(row < n) {
-      for(var col = 0; col < n; col++) {
-        board.togglePiece(row,col);
-        //check here
-        //use checkMethod for check
-        if(!board[checkMethod]()) {
-          // debugger;
-          var result = checkPermutations(n,row+1, board, checkMethod, callback);
-          if(result) {
-            return result;
-          }
-        }
-        board.togglePiece(row,col);   
-      }
-    }
-};
-
 window.findRooks = function(n, row, board, callback) {
     //base case: complete board
     if(row === n && n !== 0) {
@@ -96,17 +71,36 @@ window.findNRooksSolution = function(n){
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  //create count
-  var count = 0;
-  //create board
-  var board = new Board({'n': n});
+    var count = 0;
+  //start all as empty string
+  var all = '';
+  //populate string with n number of 1s
+  for(var i = 0; i < n; i++) {
+    all += '1';
+  }
+  //make it base 10;
+  all = parseInt(all, 2);
 
-  findRooks(n, 0, board, function() { count++; });
+  var tryBoard = function(cols) {
 
-  //return count
-  return count;
+    if(cols === all) {
+      count++;
+      return;
+    }
 
+    var poss = ~(cols) & all;
+
+    while(poss) {
+      var bit = poss & -poss;
+      poss = poss - bit;
+      tryBoard( cols|bit );
+    }
   };
+
+  tryBoard(0,0,0);
+
+  return count;
+};
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
@@ -120,11 +114,36 @@ window.findNQueensSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-
   var count = 0;
-  var board = new Board({'n' : n});
-  findQueens(n, n - 1, board, function() { count++; });
+  //start all as empty string
+  var all = '';
+  //populate string with n number of 1s
+  for(var i = 0; i < n; i++) {
+    all += '1';
+  }
+  //make it base 10;
+  all = parseInt(all, 2);
+
+  var tryBoard = function(ld, cols, rd) {
+
+    if(cols === all) {
+      count++;
+      return;
+    }
+
+    var poss = ~( ld | cols | rd ) & all;
+
+    while(poss) {
+      var bit = poss & -poss;
+      poss = poss - bit;
+      tryBoard( (ld|bit)<<1, cols|bit, (rd|bit)>>1 );
+    }
+  };
+
+  tryBoard(0,0,0);
+
   return count;
+
 };
 
 
